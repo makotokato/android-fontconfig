@@ -94,31 +94,6 @@ impl FontFamily {
             fonts: fonts,
         }
     }
-
-    pub fn by_weight(&self, weight: i32) -> Result<FontEntry, String> {
-        let mut better_fonts: Vec<FontEntry> = self
-            .fonts
-            .iter()
-            .filter(|&font| {
-                ((font.weight.is_some() && font.weight.unwrap() == weight)
-                    || (font.weight.is_none() && weight == 400))
-            })
-            .cloned()
-            .collect();
-        if better_fonts.is_empty() {
-            better_fonts = self
-                .fonts
-                .iter()
-                .filter(|&font| (font.weight.is_none()))
-                .cloned()
-                .collect();
-            if better_fonts.is_empty() {
-                return Err("not found".to_string());
-            }
-        }
-        let font = better_fonts.first().unwrap();
-        Ok(font.clone())
-    }
 }
 
 impl PartialEq for FontFamily {
