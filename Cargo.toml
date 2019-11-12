@@ -1,0 +1,8 @@
+[package]
+name = "android-fontconfig"
+version = "0.1.0"
+authors = ["Makoto Kato <m_kato@ga2.so-net.ne.jp>"]
+edition = "2018"
+
+[dependencies]
+xml-rs = "0.8"
