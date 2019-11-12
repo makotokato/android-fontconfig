@@ -302,17 +302,21 @@ impl AndroidFontConfig {
         "".to_owned()
     }
 
-    /// Return font path of default font by font family
-    pub fn font_path_by_family(&self, name: &str) -> Result<(&str, i32), String> {
-        let mut font_name = name;
+    /// Return font family by resolving alias name
+    pub fn font_family_by_alias<'a>(&'a self, name: &'a str) -> &'a str {
         for alias in &self.font_aliases {
             if alias.name == name {
-                font_name = &alias.to;
+                return &alias.to;
             }
         }
+        name
+    }
+
+    /// Return font path of default font by font family
+    pub fn font_path_by_family(&self, name: &str) -> Result<(&str, i32), String> {
         for family in &self.font_families {
             if family.name.is_some() {
-                if font_name == family.name.as_ref().unwrap() {
+                if name == family.name.as_ref().unwrap() {
                     for font in &family.fonts {
                         if font.is_regular() && font.path.is_some() {
                             return Ok((font.path.as_ref().unwrap(), font.index));
@@ -410,9 +414,15 @@ fn test_default_font_family() {
         config.font_path_by_family("serif").unwrap(),
         ("/system/fonts/NotoSerif-Regular.ttf", 0)
     );
+}
+
+#[cfg(test)]
+#[test]
+fn test_alias() {
+    let config = AndroidFontConfig::new_from_file("data/fonts-1.xml");
     assert_eq!(
-        config.font_path_by_family("arial").unwrap(),
-        ("/system/fonts/Roboto-Regular.ttf", 0)
+        config.font_family_by_alias("arial"),
+        "sans-serif"
     );
 }
 
