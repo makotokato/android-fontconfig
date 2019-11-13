@@ -378,12 +378,12 @@ impl AndroidFontConfig {
         Err("not found".to_string())
     }
 
-    pub fn all_font_paths(&self) -> Vec<String> {
-        let mut paths = Vec::new();
+    pub fn all_font_paths(&self) -> Vec<(&str, i32)> {
+        let mut paths: Vec<(&str, i32)> = Vec::new();
         for family in &self.font_families {
             for font in &family.fonts {
-                if let Some(v) = &font.path {
-                    paths.push(v.clone());
+                if font.path.is_some() {
+                    paths.push((&font.path.as_ref().unwrap(), font.index));
                 }
             }
         }
@@ -473,6 +473,12 @@ fn test_fallback_family_and_lang() {
             .unwrap(),
         ("/system/fonts/NotoSerifThai-Regular.ttf", 0)
     );
+    assert_eq!(
+        config
+            .font_path_by_family_and_lang("serif", "zh-Hans")
+            .unwrap(),
+        ("/system/fonts/NotoSerifCJK-Regular.ttc", 2)
+    );
 }
 
 #[cfg(test)]
@@ -481,8 +487,11 @@ fn test_all_font_paths() {
     let config = AndroidFontConfig::new_from_file("data/fonts-1.xml");
     assert!(config
         .all_font_paths()
-        .contains(&"/system/fonts/NotoSansThai-Regular.ttf".to_owned()));
+        .contains(&("/system/fonts/NotoSansThai-Regular.ttf", 0)));
     assert!(config
         .all_font_paths()
-        .contains(&"/system/fonts/Roboto-Thin.ttf".to_owned()));
+        .contains(&("/system/fonts/Roboto-Thin.ttf", 0)));
+    assert!(config
+        .all_font_paths()
+        .contains(&("/system/fonts/NotoSansCJK-Regular.ttc", 2)));
 }

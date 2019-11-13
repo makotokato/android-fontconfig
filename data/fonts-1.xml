@@ -36,6 +36,7 @@
 
   <family lang="zh-Hans">
     <font weight="400" style="normal" index="2">NotoSansCJK-Regular.ttc</font>
+    <font weight="400" style="normal" index="2" fallbackFor="serif">NotoSerifCJK-Regular.ttc</font>
   </family>
 
   <family lang="und-Geor,und-Geok">
