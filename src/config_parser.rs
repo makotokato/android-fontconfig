@@ -269,7 +269,14 @@ impl AndroidFontConfig {
                                     for lang in v {
                                         let mut f = family.clone();
                                         f.lang = Some(lang.to_string());
-                                        font_families.push(f.clone());
+                                        font_families.push(f);
+                                    }
+                                } else if lang_attr.contains(" ") {
+                                    let v: Vec<&str> = lang_attr.split(" ").collect();
+                                    for lang in v {
+                                        let mut f = family.clone();
+                                        f.lang = Some(lang.to_string());
+                                        font_families.push(f);
                                     }
                                 } else {
                                     font_families.push(family.clone());
@@ -378,16 +385,27 @@ impl AndroidFontConfig {
         Err("not found".to_string())
     }
 
+    /// Return all font paths.
     pub fn all_font_paths(&self) -> Vec<(&str, i32)> {
-        let mut paths: Vec<(&str, i32)> = Vec::new();
+        let mut paths: Vec<(&str, i32)> = vec![];
         for family in &self.font_families {
-            for font in &family.fonts {
-                if font.path.is_some() {
-                    paths.push((&font.path.as_ref().unwrap(), font.index));
-                }
-            }
+            let _ = family
+                .fonts
+                .iter()
+                .filter(|font| font.path.is_some())
+                .map(|font| paths.push((&font.path.as_ref().unwrap(), font.index)))
+                .collect::<Vec<_>>();
         }
         paths
+    }
+
+    /// Return all font families
+    pub fn all_font_families(&self) -> Vec<&String> {
+        self.font_families
+            .iter()
+            .filter(|font| font.name.is_some())
+            .map(|font| font.name.as_ref().unwrap())
+            .collect()
     }
 }
 
@@ -420,10 +438,7 @@ fn test_default_font_family() {
 #[test]
 fn test_alias() {
     let config = AndroidFontConfig::new_from_file("data/fonts-1.xml");
-    assert_eq!(
-        config.font_family_by_alias("arial"),
-        "sans-serif"
-    );
+    assert_eq!(config.font_family_by_alias("arial"), "sans-serif");
 }
 
 #[cfg(test)]
@@ -494,4 +509,14 @@ fn test_all_font_paths() {
     assert!(config
         .all_font_paths()
         .contains(&("/system/fonts/NotoSansCJK-Regular.ttc", 2)));
+}
+
+#[cfg(test)]
+#[test]
+fn test_all_families() {
+    let config = AndroidFontConfig::new_from_file("data/fonts-1.xml");
+    assert!(config.all_font_families().contains(&&"serif".to_owned()));
+    assert!(config
+        .all_font_families()
+        .contains(&&"monospace".to_owned()));
 }
